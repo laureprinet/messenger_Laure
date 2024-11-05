@@ -80,21 +80,22 @@ def choix_channels(str):
         personne_sup=input('Id de la personne à ajouter: ')
         for d in server['channels']:
             if d['name']==groupe:
-                d['member_ids'].append(personne_sup)
+                d['member_ids'].append(int(personne_sup))
+                print(d)
                 choix_menu()
     elif str=='d':
         groupe=input('Nom du groupe à afficher: ')
         for d in server['channels']:
             if d['name']==groupe:
                 print (d)
-                choix_menu
+                choix_menu()
     else:
         nom=input('Choisir un nom de groupe: ')
         id=max([d['id'] for d in server['channels']])+1
         for d in server['users']:
             print(d['id'],'. ',d['name'])
         personnes=input('Rajouter les utilisateurs du groupe sous forme de liste avec leur id: ')
-        server['channels'].append({'id':id, 'name':nom, 'member_ids':personnes})
+        server['channels'].append({'id':id, 'name':nom, 'member_ids':list(personnes)})
         for d in server['users']:
             print(d['id'],'. ',d['name'])
         choix_menu()
