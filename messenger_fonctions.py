@@ -55,12 +55,15 @@ def choix_user():
     elif choice_user=='x':
         choix_menu()
     else:           #le choix est 'n' donc ajout d'un user
-        nom=input('Choisir un nom: ')
-        id=max([d['id'] for d in server['users']])+1
-        server['users'].append({'id':id, 'name':(nom)})
-        for d in server['users']:
-            print(d['id'],'. ',d['name'])
-        choix_menu()
+        add_user()
+
+def add_user():
+    nom=input('Choisir un nom: ')
+    id=max([d['id'] for d in server['users']])+1
+    server['users'].append({'id':id, 'name':(nom)})
+    for d in server['users']:
+        print(d['id'],'. ',d['name'])    #on réaffiche tous les users pour voir le nouveau apparaître
+    choix_menu()
 
 def choix_channels():
     for d in server['channels']:
@@ -71,36 +74,47 @@ def choix_channels():
     print('d. display a channel info')
     choice_channels=input('Enter an option: ')
     if choice_channels not in ['x','n','a','d']:
-        choice3=input('Veuillez choisir une option entre n, d, a et x: ')
-        return choix_user(choice3)
+        print('Veuillez choisir une option dans celles existentes ')
+        return choix_channels()
     elif choice_channels=='x':
         choix_menu()
     elif choice_channels=='a':
-        groupe=input('Nom du groupe pour ajouter: ')
-        for d in server['users']:
-            print(d['id'],'. ',d['name'])
-        personne_sup=input('Id de la personne à ajouter: ')
-        for d in server['channels']:
-            if d['name']==groupe:
-                d['member_ids'].append(int(personne_sup))
-                print(d)
-                choix_menu()
+        add_channel()
     elif choice_channels=='d':
-        groupe=input('Nom du groupe à afficher: ')
-        for d in server['channels']:
-            if d['name']==groupe:
-                print (d)
-                choix_menu()
-    else:
-        nom=input('Choisir un nom de groupe: ')
-        id=max([d['id'] for d in server['channels']])+1
-        for d in server['users']:
-            print(d['id'],'. ',d['name'])
-        personnes=input('Rajouter les utilisateurs du groupe sous forme de liste avec leur id: ')
-        server['channels'].append({'id':id, 'name':nom, 'member_ids':list(personnes)})
-        for d in server['users']:
-            print(d['id'],'. ',d['name'])
-        choix_menu()
+        affichage_channel()
+    else:                       #choice_channels='n' donc création d'un nouveau groupe
+        new_groupe()
 
 
+def add_channel():
+    groupe=input('Nom du groupe pour ajouter: ')
+    for d in server['users']:
+        print(d['id'],'. ',d['name'])
+    personne_sup=input('Id de la personne à ajouter: ')
+    for d in server['channels']:
+        if d['name']==groupe:
+            d['member_ids'].append(int(personne_sup))
+            print(d)
+            choix_menu()
+
+def affichage_channel():
+    groupe=input('Nom du groupe à afficher: ')
+    for d in server['channels']:
+        if d['name']==groupe:
+            print (d)
+            choix_menu()
+
+def new_groupe():
+    nom=input('Choisir un nom de groupe: ')
+    id=max([d['id'] for d in server['channels']])+1
+    for d in server['users']:
+        print(d['id'],'. ',d['name'])
+    personnes=input('Rajouter les utilisateurs du groupe en listant leur id: ')
+    server['channels'].append({'id':id, 'name':nom, 'member_ids':list(personnes)})
+    for d in server['users']:
+        print(d['id'],', ',d['name'])   #on réaffiche tous les groupes pour voir le nouveau
+    choix_menu()
+
+
+            
 choix_menu()
