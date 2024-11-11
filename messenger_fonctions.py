@@ -51,13 +51,13 @@ def choix_user():
     print('x. Main menu')
     print('n. create user')
     choice_user=input('Enter an option: ')
-    if choice_user not in ['x','n']:
-        print('Votre choix ne correspond à aucune option existante. Veuillez recommencer')
-        choix_user()
+    if choice_user=='n':
+        add_user()
     elif choice_user=='x':
         choix_menu()
-    else:           #le choix est 'n' donc ajout d'un user
-        add_user()
+    else:
+        print('Votre choix ne correspond à aucune option existante. Veuillez recommencer')
+        choix_user()
 
 def add_user():
     nom=input('Choisir un nom: ')
@@ -75,17 +75,17 @@ def choix_channels():
     print('a. add a user to the channel')
     print('d. display a channel info')
     choice_channels=input('Enter an option: ')
-    if choice_channels not in ['x','n','a','d']:
-        print('Veuillez choisir une option dans celles existentes ')
-        return choix_channels()
+    if choice_channels=='n':
+        new_groupe()
     elif choice_channels=='x':
         choix_menu()
     elif choice_channels=='a':
         add_channel()
     elif choice_channels=='d':
         affichage_channel()
-    else:                       #choice_channels='n' donc création d'un nouveau groupe
-        new_groupe()
+    else:
+        print('Veuillez choisir une option dans celles existentes ')
+        return choix_channels()
 
 
 def add_channel():
