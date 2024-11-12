@@ -24,25 +24,40 @@ import json
 # fichier=open('Server_json.json')
 # server=json.load(fichier)
 
-def load_server():          #On crée cette fonction afin de pouvoir la relancer plus tard ie pour relancer une variable au server si on l'a trop modifié dans une autre!
-    with open('Server_json.json') as json_file:
-        server = json.load(json_file)
-    return server    
-#On a server['users']:list[dict]
-#Transform server['users'] en list[User]
-
-server=load_server()
-
+##################################################
 class User:
     def __init__(self,id: int, name:str):
         self.id=id
         self.name=name
+    def attribut(self) -> None: # Une méthode
+        print(f"{self.id}. {self.name}")
 
 class Channel:
     def __init__(self,id:int,name:str,member_ids:list):
         self.id=id
         self.name=name
         self.member_ids=member_ids
+    def attribut(self) -> None: # Une méthode
+        print(f"{self.id}. {self.name}; member_ids={self.member_ids}")
+
+
+#################################################
+
+
+
+def load_server():          #On crée cette fonction afin de pouvoir la relancer plus tard ie pour relancer une variable au server si on l'a trop modifié dans une autre!
+    with open('Server_json.json') as json_file:
+        server = json.load(json_file)
+        data=server['users'].copy()
+        server['users']=[User(L['id'],L['name']) for L in data]
+    return server     
+#On a server['users']:list[dict]
+#Transform server['users'] en list[User]
+
+server=load_server()
+
+
+#################################################
 
 
 def choix_menu():
@@ -66,8 +81,8 @@ def leave():
     return None
 
 def choix_user():
-    for d in server['users']:
-        print(d['id'],'. ',d['name'])
+    for user in server['users']:
+        user.attribut()
     print('x. Main menu')
     print('n. create user')
     choice_user=input('Enter an option: ')
@@ -81,15 +96,15 @@ def choix_user():
 
 def add_user():
     nom=input('Choisir un nom: ')
-    id=max([d['id'] for d in server['users']])+1
-    server['users'].append({'id':id, 'name':(nom)})
-    for d in server['users']:
-        print(d['id'],'. ',d['name'])    #on réaffiche tous les users pour voir le nouveau apparaître
+    id=max([user.id for user in server['users']])+1
+    server['users'].append(User(id,nom))
+    for user in server['users']:
+        user.attribut()    #on réaffiche tous les users pour voir le nouveau apparaître
     choix_menu()
 
 def choix_channels():
-    for d in server['channels']:
-        print(d['id'],'.',d['name'])
+    for channel in server['channels']:
+        channel.attribut()
     print('x. Main menu')
     print('n. create channel')
     print('a. add a user to the channel')
@@ -110,22 +125,22 @@ def choix_channels():
 
 def add_channel():
     groupe=input('Nom du groupe pour ajouter: ')
-    for d in server['users']:
-        print(d['id'],'. ',d['name'])
+    for channel in server['users']:
+        channel.attribut()
     personne_sup=input('Id de la personne à ajouter: ')
-    for d in server['channels']:
-        if d['name']==groupe:
-            d['member_ids'].append(int(personne_sup))
-            print(d)
+    for channel in server['channels']:
+        if channel.name ==groupe:
+            channel.member_ids.append(int(personne_sup))
+            channel.attribut()
             choix_menu()
     # print('Le nom de groupe est inexistant pour le moment. Veuillez choisir un groupe existant ou en créer un nouveau')
     # choix_channels()
 
 def affichage_channel():
     groupe=input('Nom du groupe à afficher: ')
-    for d in server['channels']:
-        if d['name']==groupe:
-            print (d)
+    for channel in server['channels']:
+        if channel.name==groupe:
+            channel.attribut
             choix_menu()
     # print('Le nom de groupe est inexistant pour le moment. Veuillez choisir un groupe existant ou en créer un nouveau')
     # choix_channels()
@@ -133,25 +148,25 @@ def affichage_channel():
 
 def new_groupe():
     nom=input('Choisir un nom de groupe: ')
-    id=max([d['id'] for d in server['channels']])+1
-    for d in server['users']:
-        print(d['id'],'. ',d['name'])
+    id=max([channel.id for channel in server['channels']])+1
+    for user in server['users']:
+        user.attribut()
     personnes=input('Rajouter les utilisateurs du groupe en listant leur id: ')
-    L=[int(e) for e in list(personnes.split(','))] #id des users sous forme de liste mais id en tant que int et pas string
-    server['channels'].append({'id':id, 'name':nom, 'member_ids':L})
-    for d in server['channels']:
-        print(d['id'],', ',d['name'])   #on réaffiche tous les groupes pour voir le nouveau
+    member_ids=[int(id_str) for id_str in list(personnes.split(','))] #id des users sous forme de liste mais id en tant que int et pas string
+    server['channels'].append(Channel(id,nom,member_ids))
+    for channel in server['channels']:
+        channel.attribut()   #on réaffiche tous les groupes pour voir le nouveau
     choix_menu()
 
 def delete_user():
     groupe=input('Nom du groupe concerné: ')
     for channel in server['channels']:
-        if channel['name']==groupe:
+        if channel.name==groupe:
             bon_channel=channel
-    print (bon_channel['member_ids'])  #afficher les user du groupe pour voir laquelle on veut enlever
-    personne_del=int(input('Id de la personne à retirer: ')) #int de l'id de la personne à supprimer
-    print(f'vous avez retirer luser avec id {bon_channel['member_ids'].pop(personne_del)}. Voici alors les infos du groupe modifié')
-    print(bon_channel)
+    print (bon_channel.member_ids)  #afficher les user du groupe pour voir laquelle on veut enlever
+    personne_del_id=int(input('Id de la personne à retirer: ')) #int de l'id de la personne à supprimer
+    print(f'vous avez retirer l''user avec id {bon_channel.member_ids.pop(personne_del)}. Voici alors les infos du groupe modifié :')
+    bon_channel.attribut()
     choix_menu()
     #print('Le nom de groupe est inexistant pour le moment. Veuillez choisir un groupe existant ou en créer un nouveau')
     #choix_channels()
@@ -160,6 +175,8 @@ def delete_user():
 
 
 def save():
+    data=server['users'].copy()
+    server['users']=[{'id':user.id,'name':user.name} for user in data]
     with open('Server_json.json', 'w') as file:
         json.dump(server, file)
             
