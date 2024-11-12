@@ -21,8 +21,28 @@ import json
 #         }
 #     ]
 # }
-fichier=open('Server_json.json')
-server=json.load(fichier)
+# fichier=open('Server_json.json')
+# server=json.load(fichier)
+
+def load_server():          #On crée cette fonction afin de pouvoir la relancer plus tard ie pour relancer une variable au server si on l'a trop modifié dans une autre!
+    with open('Server_json.json') as json_file:
+        server = json.load(json_file)
+    return server    
+#On a server['users']:list[dict]
+#Transform server['users'] en list[User]
+
+server=load_server()
+
+class User:
+    def __init__(self,id: int, name:str):
+        self.id=id
+        self.name=name
+
+class Channel:
+    def __init__(self,id:int,name:str,member_ids:list):
+        self.id=id
+        self.name=name
+        self.member_ids=member_ids
 
 
 def choix_menu():
