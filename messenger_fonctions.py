@@ -1,5 +1,18 @@
 from datetime import datetime
 import json
+import argparse
+
+# Créer un objet ArgumentParser
+parser = argparse.ArgumentParser(description="Description de votre script.")
+
+# Ajouter un argument
+parser.add_argument('--argument', type=str, required=True, help="Description de l'argument.")
+
+# Parser les arguments
+args = parser.parse_args()
+
+# Utiliser l'argument
+print(f"Argument fourni : {args.argument}")
 
 # server = {
 #     'users': [
