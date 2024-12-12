@@ -167,7 +167,7 @@ def leave():
 def choix_users():
     '''Les différents choix du menu user'''
     print('___________CHOIX UTILISATEUR______________')
-    for user in server['users']:
+    for user in server.users:
         print(User(user.id, user.name))
     print('x. Main menu')
     print('n. create user')
@@ -186,9 +186,9 @@ def choix_users():
 def add_user():
     '''Permet d'ajouter un nouveau contact'''
     nom=input('Choisir le nom du nouveau contact: ')
-    id=max([user.id for user in server['users']])+1
+    id=max([user.id for user in server.users])+1
     server['users'].append(User(id,nom))
-    for user in server['users']:
+    for user in server.users:
         print(User(user.id, user.name))    #on réaffiche tous les users pour voir le nouveau apparaître
     server.save(SERVER_JSON_NAME)  #On sauvegarde, comme on vient de modifier les données
     choix_menu()
@@ -196,7 +196,7 @@ def add_user():
 def delete_user():
     '''Permet de supprimer un utilisateur'''
     id=input('Quel est l\'id de l\'utilisatueur à supprimer ?')
-    for user in server['users']:
+    for user in server.users:
         if user.id==id:
             user_deleted=server.pop(user)
     print('Le contact supprimé est donc : ')
@@ -231,10 +231,10 @@ def choix_channels():
 
 def add_member_to_channel():
     groupe=input('Nom du groupe pour ajouter: ')
-    for channel in server['users']:
+    for channel in server.users:
         print(Channel(channel.id, channel.name, channel.member_ids))
     personne_sup=input('Id de la personne à ajouter: ')
-    for channel in server['channels']:
+    for channel in server.channels:
         if channel.name ==groupe:
             channel.member_ids.append(int(personne_sup))
             print(Channel(channel.id, channel.name, channel.member_ids))
@@ -245,12 +245,12 @@ def add_member_to_channel():
 
 def affichage_channel():
     groupe=input('Nom du groupe à afficher: ')
-    for channel in server['channels']:
+    for channel in server.channels:
         if channel.name==groupe:
             bon_channel=channel
             liste_user_de_bon_channel=[]
             for id in bon_channel.member_ids :
-                for user in server['users']:
+                for user in server.users:
                     if user.id==id :
                         liste_user_de_bon_channel.append(user.name)  #ajout du nom correspondant à l'user d'identifiant id
             print(Channel(channel.name, channel.id, channel.member_ids))
@@ -261,20 +261,20 @@ def affichage_channel():
 
 def new_groupe():
     nom=input('Choisir un nom de groupe: ')
-    id=max([channel.id for channel in server['channels']])+1
-    for user in server['users']:
+    id=max([channel.id for channel in server.channels])+1
+    for user in server.users:
         print(User(user.id, user.name))
     personnes=input('Rajouter les utilisateurs du groupe en listant leur id: ')
     member_ids=[int(id_str) for id_str in list(personnes.split(','))] #id des users sous forme de liste mais id en tant que int et pas string
-    server['channels'].append(Channel(id,nom,member_ids))
-    for channel in server['channels']:
+    server.channels.append(Channel(id,nom,member_ids))
+    for channel in server.channels:
         print(Channel(channel.id,channel.name,channel.member_ids))   #on réaffiche tous les groupes pour voir le nouveau
     server.save(SERVER_JSON_NAME)  #On sauvegarde, comme on vient de modifier les données
     choix_menu()
 
 def delete_user_from_channel():
     groupe=input('Nom du groupe concerné: ')
-    for channel in server['channels']:
+    for channel in server.channels:
         if channel.name==groupe:
             bon_channel=channel
     print (bon_channel.member_ids)  #afficher les user du groupe pour voir laquelle on veut enlever
@@ -307,30 +307,30 @@ def choix_messages():
         choix_users()
 
 def send_message(): 
-    for channel in server['channels']:
+    for channel in server.channels:
         print(Channel(channel.id, channel.name, channel.member_ids))
     channel_id = input('Donner l\'id du groupe dans lequel le message sera envoyé')
-    for channel in server['channels']: 
+    for channel in server.channels: 
         if channel.id==channel_id:
             bon_channel=channel
     print('Voici les utilisateurs dans le groupe :')
     for id_user in bon_channel.member_ids:
-        for user in server['users']:
+        for user in server.users:
             if id_user==user.id:
                 print(User(user.id,user.name))
     sender_id=input('Donner l\'id de l\'expéditeur : ')
     content=input('Que voulez vous envoyer: ')
     reception_date=input('Quand envoyez-vous le message? (A remplir comme \'11h05, 05/05/24\')')
-    id=max([message.id for message in server['messages']])+1
-    server['message'].append(Messages(id,reception_date,sender_id, channel_id, sender_id))
-    for message in server['message']:
+    id=max([message.id for message in server.messages])+1
+    server.messages.append(Messages(id,reception_date,sender_id, channel_id, sender_id))
+    for message in server.messages:
         print(Messages(message.id, message.reception_date, message.sender_id, message.channel_id, message.content))   #on réaffiche tous les messages pour voir le nouveau apparaître
     server.save(SERVER_JSON_NAME)  #On sauvegarde, comme on vient de modifier les données
     choix_menu()
 
 def delete_message():
     id=input('Quel est l\'id du message à supprimer?')
-    for message in server['messages']:
+    for message in server.messages:
         if message.id==id:
             bon_message=message
     print(f'Le message supprimé est donc : {bon_message.content}, envoyé par l\'utilisateur d\'id {bon_message.sender_id} ')
