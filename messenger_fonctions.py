@@ -3,16 +3,16 @@ import json
 import argparse
 
 # Créer un objet ArgumentParser
-parser = argparse.ArgumentParser(description="Description de votre script.")
+parser = argparse.ArgumentParser()
 
 # Ajouter un argument
-parser.add_argument('--argument', type=str, required=True, help="Description de l'argument.")
+parser.add_argument('--server', '-s', type=str, required=True, help="enter json path")
 
 # Parser les arguments
 args = parser.parse_args()
 
 # Utiliser l'argument
-print(f"Argument fourni : {args.argument}")
+print(f"Server json : {args.server}")
 
 # server = {
 #     'users': [
