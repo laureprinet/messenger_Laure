@@ -207,7 +207,7 @@ def delete_user():
 
 ############ LES GROUPES #####################
 def choix_channels():
-    for channel in server['channels']:
+    for channel in server.channels:
         print(Channel(channel.id,channel.name, channel.member_ids))
     print('x. Main menu')
     print('n. create channel')
@@ -290,7 +290,7 @@ def delete_user_from_channel():
 
 ############ LES MESSAGES ##################
 def choix_messages():
-    for message in server['messages']:
+    for message in server.messages:
         print(Messages(message.id, message.reception_date, message.sender_id, message.channel_id, message.content))
     print('x. Main menu')
     print('n. sen a message')
