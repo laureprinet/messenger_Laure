@@ -52,28 +52,90 @@ class Messages:
 #Cette classe n'est pas encore utilisée dans le code... Les messages n'ont pas encore été pris en compte
 
 
-############# CHARGEMENT DU SERVER ######################
+############# LE SERVEUR #######################
+class Server : 
+    def __init__(self, name : str, users : list[User], channels : list[Channel], messages : list[Messages]):
+        self.name=name
+        self.users=users
+        self.channels=channels
+        self.messages=messages
 
-Server_json_name='Server_json.json'
+    def __repr__(self) -> str :
+        return f'Server(name={self.name}, users={self.users}, channels={self.channels})'
 
-def load_server():          #On crée cette fonction afin de pouvoir la relancer plus tard ie pour relancer une variable au server si on l'a trop modifié dans une autre!
-    with open(Server_json_name) as json_file:
-        server = json.load(json_file)
+    
+    def load_server(self,Server_json_name):          #On crée cette fonction afin de pouvoir la relancer plus tard ie pour relancer une variable au server si on l'a trop modifié dans une autre!
+        with open(Server_json_name) as json_file:
+            doc = json.load(json_file)
         
-        data_users=server['users'].copy()
-        server['users']=[User(L['id'],L['name']) for L in data_users]     #j'ai créé data pour vraiment voir l'étape de copie qui ne me semblait pas évidente
+            self.users=[User(L['id'],L['name']) for L in doc['users']]     #j'ai créé data pour vraiment voir l'étape de copie qui ne me semblait pas évidente
         
-        data_channels=server['channels'].copy()
-        server['channels']=[Channel(L['id'],L['name'],L['member_ids']) for L in data_channels]
+            self.channels=[Channel(L['id'],L['name'],L['member_ids']) for L in doc['channels']]
         
-        data_messages=server['messages'].copy()
-        server['messages']=[Messages(L['id'], L['reception_date'], L['sender_id'], L['channel_id'], L['content']) for L in data_messages]
-    return server     
-#On a server['users']:list[dict]
-#Transform server['users'] en list[User]
+            self.messages=[Messages(L['id'], L['reception_date'], L['sender_id'], L['channel_id'], L['content']) for L in doc['messages']]     
 
-server=load_server()
+    def save(Server_json_name):
+        server_json={}
+        server_json['users']=[{'id':user.id,'name':user.name} for user in server.users]
+        server_json['channels']=[{'id':channel.id,'name':channel.name, 'member_ids': channel.member_ids} for channel in server.channels]
+        server_json['messages']=[{'id' : message.id, 'reception_date': message.reception_date, 'sender_id':message.sender_id, 'channel_id': message.channel_id, 'content':message.content} for message in server.messages]
+        with open(Server_json_name, 'w') as file:
+            json.dump(server_json, file)
 
+
+SERVER_JSON_NAME='Server_json.json'    
+server=Server('Messenger',[],[],[])
+server.load_server(SERVER_JSON_NAME)
+
+
+class Interaction:
+    def __init__ (self, serv : Server):
+                 self.server=serv
+
+#     def choix_menu():
+#         print ('1.See users')
+#         print ('2.See channels')
+#         print ('3. See messages')
+#         print('x. Leave')
+#         choice=input('Select an option: ')
+#         if choice=='x': 
+#             leave()
+#         elif choice=='1':
+#             choix_users()
+#         elif choice =='2':
+#             choix_channels()
+#         elif choice =='3':
+#             choix_messages()
+#         else :
+#             print('Unknown option:', choice)
+#             choix_menu()
+
+#         def leave():
+#             print ('bye')
+#             return None
+
+#         def choix_users():
+#             '''Les différents choix du menu user'''
+#             print('___________CHOIX UTILISATEUR______________')
+#             for user in server['users']:
+#                 print(User(user.id, user.name))
+#             print('x. Main menu')
+#             print('n. create user')
+#             print('d. delete user')
+#             choice_user=input('Enter an option: ')
+#             if choice_user=='n':
+#                 add_user()
+#             elif choice_user=='d':
+#                 delete_user()
+#             elif choice_user=='x':
+#                 choix_menu()
+#             else:
+#                 print('Votre choix ne correspond à aucune option existante. Veuillez recommencer')
+#                 choix_users()
+
+
+
+        
 
 ############# LE MENU PRINCIPAL #####################
 
@@ -128,7 +190,7 @@ def add_user():
     server['users'].append(User(id,nom))
     for user in server['users']:
         print(User(user.id, user.name))    #on réaffiche tous les users pour voir le nouveau apparaître
-    save()  #On sauvegarde, comme on vient de modifier les données
+    server.save(SERVER_JSON_NAME)  #On sauvegarde, comme on vient de modifier les données
     choix_menu()
 
 def delete_user():
@@ -139,7 +201,7 @@ def delete_user():
             user_deleted=server.pop(user)
     print('Le contact supprimé est donc : ')
     print(Channel(user_deleted.id, user_deleted.name))
-    save() #On sauvegarde, comme on vient de modifier les données
+    server.save(SERVER_JSON_NAME) #On sauvegarde, comme on vient de modifier les données
     choix_menu()
 
 
@@ -176,7 +238,7 @@ def add_member_to_channel():
         if channel.name ==groupe:
             channel.member_ids.append(int(personne_sup))
             print(Channel(channel.id, channel.name, channel.member_ids))
-    save(server)  #On sauvegarde, comme on vient de modifier les données
+    server.save(SERVER_JSON_NAME)  #On sauvegarde, comme on vient de modifier les données
     choix_menu()
     # print('Le nom de groupe est inexistant pour le moment. Veuillez choisir un groupe existant ou en créer un nouveau')
     # choix_channels()
@@ -207,7 +269,7 @@ def new_groupe():
     server['channels'].append(Channel(id,nom,member_ids))
     for channel in server['channels']:
         print(Channel(channel.id,channel.name,channel.member_ids))   #on réaffiche tous les groupes pour voir le nouveau
-    save()  #On sauvegarde, comme on vient de modifier les données
+    server.save(SERVER_JSON_NAME)  #On sauvegarde, comme on vient de modifier les données
     choix_menu()
 
 def delete_user_from_channel():
@@ -219,7 +281,7 @@ def delete_user_from_channel():
     personne_del_id=int(input('Id de la personne à retirer: ')) #int de l'id de la personne à supprimer
     print(f'vous avez retirer l\'user avec id {bon_channel.member_ids.pop(personne_del_id)}. Voici alors les infos du groupe modifié :')
     print(Channel(bon_channel.id, bon_channel.name, bon_channel.member_ids))
-    save()  #On sauvegarde, comme on vient de modifier les données
+    server.save(SERVER_JSON_NAME)  #On sauvegarde, comme on vient de modifier les données
     choix_menu()
     #print('Le nom de groupe est inexistant pour le moment. Veuillez choisir un groupe existant ou en créer un nouveau')
     #choix_channels()
@@ -263,7 +325,7 @@ def send_message():
     server['message'].append(Messages(id,reception_date,sender_id, channel_id, sender_id))
     for message in server['message']:
         print(Messages(message.id, message.reception_date, message.sender_id, message.channel_id, message.content))   #on réaffiche tous les messages pour voir le nouveau apparaître
-    save()  #On sauvegarde, comme on vient de modifier les données
+    server.save(SERVER_JSON_NAME)  #On sauvegarde, comme on vient de modifier les données
     choix_menu()
 
 def delete_message():
@@ -272,20 +334,9 @@ def delete_message():
         if message.id==id:
             bon_message=message
     print(f'Le message supprimé est donc : {bon_message.content}, envoyé par l\'utilisateur d\'id {bon_message.sender_id} ')
-    save() #On sauvegarde, car les données ont été modifiées
+    server.save(SERVER_JSON_NAME) #On sauvegarde, car les données ont été modifiées
     choix_menu()
 
-
-############## SAUVEGARDE ##################
-
-def save():
-    data_users=server['users'].copy()
-    data_channels=server['channels'].copy()
-    server_json={}
-    server_json['users']=[{'id':user.id,'name':user.name} for user in data_users]
-    server_json['channels']=[{'id':channel.id,'name':channel.name, 'member_ids': channel.member_ids} for channel in data_channels]
-    with open(Server_json_name, 'w') as file:
-        json.dump(server_json, file)
 
 ############################################      
 choix_menu()
