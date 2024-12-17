@@ -6,13 +6,17 @@ import argparse
 parser = argparse.ArgumentParser()
 
 # Ajouter un argument
-parser.add_argument('--server', '-s', type=str, required=True, help="enter json path")
+parser.add_argument('-s', '--server', type=str, required=True, help="enter json path")
 
 # Parser les arguments
 args = parser.parse_args()
 
 # Utiliser l'argument
-print(f"Server json : {args.server}")
+print('Server json :', args.server)
+
+
+SERVER_JSON_NAME=args.server
+#'Server_json.json'  
 
 # server = {
 #     'users': [
@@ -37,7 +41,9 @@ print(f"Server json : {args.server}")
 # fichier=open('Server_json.json')
 # server=json.load(fichier)
 
+
 ############## CREATION DES CLASSES ####################
+
 class User:
     def __init__(self,id: int, name:str):
         self.id=id
@@ -95,8 +101,7 @@ class Server :
         with open(Server_json_name, 'w') as file:
             json.dump(server_json, file)
 
-
-SERVER_JSON_NAME='Server_json.json'    
+  
 server=Server('Messenger',[],[],[])
 server.load_server(SERVER_JSON_NAME)
 
