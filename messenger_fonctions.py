@@ -1,5 +1,7 @@
 from datetime import datetime
 import json
+import requests
+
 
 # server = {
 #     'users': [
@@ -25,10 +27,6 @@ import json
 # server=json.load(fichier)
 
 ############## CREATION DES CLASSES ##################
-class RemoteServer :
-    def __init__(self):
-        pass
-
 class User:
     def __init__(self,id: int, name:str):
         self.id=id
@@ -86,9 +84,37 @@ class Server :
         with open(Server_json_name, 'w') as file:
             json.dump(server_json, file)
 
+    def get_user(self)->list[User]:
+        return self.users
+    
+    def get_channel(self)->list[Channel]:
+        return self.channels
+    
+    def get_message(self)->list[Messages]:
+        return self.messages
+
+class RemoteServer :
+    def __init__(self,url):
+        self.url=url
+
+    def get_user(self)->list[User]:
+        response_u = requests.get(self.url+'/users')
+        response_u.json()
+        return [User(user["id"], user["name"]) for user in response_u]
+
+    def get_channel(self)->list[Channel]:
+        response_c = requests.get(self.url+'/channels')
+        response_c.json()
+        return [Channel(channel["id"], channel["name"], channel["member_ids"]) for channel in response_c]
+
+    def get_message(self)->list[Messages]:
+        response_m= requests.get(self.url+'/messages')
+        response_m.json()
+        return [Messages(message["id"], message["reception_date"], message["sender_id"],message["channel_id"], message["content"]) for message in response_m]
+    
 ############# LES INTERACTIONS ###############
 class Interaction:
-    def __init__ (self, serv : Server):
+    def __init__ (self, serv:RemoteServer):
                  self.server=serv
 
 ############# LE MENU PRINCIPAL ###################
@@ -119,7 +145,7 @@ class Interaction:
     def choix_users(self):
         '''Les différents choix du menu user'''
         print('___________CHOIX UTILISATEUR______________')
-        for user in self.server.users:
+        for user in self.server.get_user():
             print(User(user.id, user.name))
         print('x. Main menu')
         print('n. create user')
@@ -138,17 +164,17 @@ class Interaction:
     def add_user(self):
         '''Permet d'ajouter un nouveau contact'''
         nom=input('Choisir le nom du nouveau contact: ')
-        id=max([user.id for user in self.server.users])+1
-        server['users'].append(User(id,nom))
-        for user in self.server.users:
+        id=max([user.id for user in self.server.get_user()])+1
+        self.server.get_user().append(User(id,nom)) #dans Server mettre une fonction add.user
+        for user in self.server.get_user():
             print(User(user.id, user.name))    #on réaffiche tous les users pour voir le nouveau apparaître
-        server.save(SERVER_JSON_NAME)  #On sauvegarde, comme on vient de modifier les données
+        self.server.save(SERVER_JSON_NAME)  #On sauvegarde, comme on vient de modifier les données
         self.choix_menu()
 
     def delete_user(self):
         '''Permet de supprimer un utilisateur'''
         id=input('Quel est l\'id de l\'utilisatueur à supprimer ?')
-        for user in self.server.users:
+        for user in self.server.get_user():
             if user.id==id:
                 user_deleted=self.server.pop(user)
         print('Le contact supprimé est donc : ')
@@ -158,7 +184,7 @@ class Interaction:
 
 ############ LES GROUPES #####################
     def choix_channels(self):
-        for channel in self.server.channels:
+        for channel in self.server.get_channel():
             print(Channel(channel.id,channel.name, channel.member_ids))
         print('x. Main menu')
         print('n. create channel')
@@ -182,10 +208,10 @@ class Interaction:
 
     def add_member_to_channel(self):
         groupe=input('Nom du groupe pour ajouter: ')
-        for channel in self.server.channels:
+        for channel in self.server.get_channel():
             print(Channel(channel.id, channel.name, channel.member_ids))
         personne_sup=input('Id de la personne à ajouter: ')
-        for channel in self.server.channels:
+        for channel in self.server.get_channel():
             if channel.name ==groupe:
                 channel.member_ids.append(int(personne_sup))
                 print(Channel(channel.id, channel.name, channel.member_ids))
@@ -196,12 +222,12 @@ class Interaction:
 
     def affichage_channel(self):
         groupe=input('Nom du groupe à afficher: ')
-        for channel in self.server.channels:
+        for channel in self.server.get_channel():
             if channel.name==groupe:
                 bon_channel=channel
                 liste_user_de_bon_channel=[]
                 for id in bon_channel.member_ids :
-                    for user in self.server.users:
+                    for user in self.server.get_user():
                         if user.id==id :
                             liste_user_de_bon_channel.append(user.name)  #ajout du nom correspondant à l'user d'identifiant id
                 print(Channel(channel.name, channel.id, channel.member_ids))
@@ -212,20 +238,20 @@ class Interaction:
 
     def new_groupe(self):
         nom=input('Choisir un nom de groupe: ')
-        id=max([channel.id for channel in self.server.channels])+1
-        for user in self.server.users:
+        id=max([channel.id for channel in self.server.get_channel()])+1
+        for user in self.server.get_user():
             print(User(user.id, user.name))
         personnes=input('Rajouter les utilisateurs du groupe en listant leur id: ')
         member_ids=[int(id_str) for id_str in list(personnes.split(','))] #id des users sous forme de liste mais id en tant que int et pas string
-        self.server.channels.append(Channel(id,nom,member_ids))
-        for channel in self.server.channels:
+        self.server.get_channel().append(Channel(id,nom,member_ids))
+        for channel in self.server.get_channel():
             print(Channel(channel.id,channel.name,channel.member_ids))   #on réaffiche tous les groupes pour voir le nouveau
         self.server.save(SERVER_JSON_NAME)  #On sauvegarde, comme on vient de modifier les données
         self.choix_menu()
 
     def delete_user_from_channel(self):
         groupe=input('Nom du groupe concerné: ')
-        for channel in self.server.channels:
+        for channel in self.server.get_channel():
             if channel.name==groupe:
                 bon_channel=channel
         print (bon_channel.member_ids)  #afficher les user du groupe pour voir laquelle on veut enlever
@@ -239,7 +265,7 @@ class Interaction:
 
 ############ LES MESSAGES ##################
     def choix_messages(self):
-        for message in self.server.messages:
+        for message in self.server.get_message():
             print(Messages(message.id, message.reception_date, message.sender_id, message.channel_id, message.content))
         print('x. Main menu')
         print('n. sen a message')
@@ -256,10 +282,10 @@ class Interaction:
             self.choix_users()
 
     def send_message(self): 
-        for channel in self.server.channels:
+        for channel in self.server.get_channel():
             print(Channel(channel.id, channel.name, channel.member_ids))
         channel_id = input('Donner l\'id du groupe dans lequel le message sera envoyé')
-        for channel in self.server.channels: 
+        for channel in self.server.get_channel(): 
             if channel.id==channel_id:
                 bon_channel=channel
         print('Voici les utilisateurs dans le groupe :')
@@ -270,16 +296,16 @@ class Interaction:
         sender_id=input('Donner l\'id de l\'expéditeur : ')
         content=input('Que voulez vous envoyer: ')
         reception_date=input('Quand envoyez-vous le message? (A remplir comme \'11h05, 05/05/24\')')
-        id=max([message.id for message in self.server.messages])+1
-        server.messages.append(Messages(id,reception_date,sender_id, channel_id, sender_id))
-        for message in self.server.messages:
+        id=max([message.id for message in self.server.get_message()])+1
+        self.server.get_message().append(Messages(id,reception_date,sender_id, channel_id, sender_id))
+        for message in self.server.get_message():
             print(Messages(message.id, message.reception_date, message.sender_id, message.channel_id, message.content))   #on réaffiche tous les messages pour voir le nouveau apparaître
         self.server.save(SERVER_JSON_NAME)  #On sauvegarde, comme on vient de modifier les données
         self.choix_menu()
 
     def delete_message(self):
         id=input('Quel est l\'id du message à supprimer?')
-        for message in self.server.messages:
+        for message in self.server.get_message():
             if message.id==id:
                 bon_message=message
         print(f'Le message supprimé est donc : {bon_message.content}, envoyé par l\'utilisateur d\'id {bon_message.sender_id} ')
@@ -291,5 +317,10 @@ class Interaction:
 SERVER_JSON_NAME='Server_json.json'    
 server=Server('Messenger',[],[],[])
 server.load_server(SERVER_JSON_NAME)
-interaction=Interaction(server)
-interaction.choix_menu(server)
+#interaction=Interaction(server)
+#interaction.choix_menu()
+
+
+server_internet=RemoteServer('http://vps-cfefb063.vps.ovh.net/channels')
+interaction=Interaction(server_internet)
+interaction.choix_menu()
