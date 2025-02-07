@@ -11,7 +11,7 @@ class User:
         return f'User (id={self.id}, name={self.name})'
     
 class Channel:
-    def __init__(self,id:int,name:str,member_ids:list):
+    def __init__(self,id:int,name:str,member_ids:list[int]):
         self.id=id
         self.name=name
         self.member_ids=member_ids
@@ -25,5 +25,6 @@ class Message:
         self.sender_id=sender_id
         self.channel_id=channel_id
         self.content=content
+        
     def __repr__(self)->str:
         return f'Message (id = {self.id}, content = {self.content}, envoyé par l\'user d\'id {self.sender_id} ; channel = {self.channel_id}, date de réception = {self.reception_date})'
