@@ -38,3 +38,4 @@ interaction.choix_menu()
 
 ## Si on veut lancer depuis un serveur sur le web   
 # server_internet=RemoteServer('https://groupe5-python-mines.fr')
+
