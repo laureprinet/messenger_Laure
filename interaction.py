@@ -136,7 +136,7 @@ class Interaction:
     def affichage_channel(self)->None:
         print('------------------------------------')
         groupe=int(input('Id du groupe à afficher: '))
-        self.server.displaying_channel_members(groupe)
+        print(self.server.get_channel_members(groupe))
         print('------------------------------------')
         print ('a. display another channel')
         print ('x. return to channel menu')
@@ -170,7 +170,7 @@ class Interaction:
         groupe_id=int(input('Id du groupe concerné: '))
         print('------------------------------------')
         print('Voici les membres du groupe')
-        self.server.displaying_channel_members(groupe_id)
+        print(self.server.get_channel_members(groupe_id))
         print('------------------------------------')
         personne_del_id=int(input('Id de la personne à retirer: ')) #int de l'id de la personne à supprimer
         self.server.deleting_user_from_channel(groupe_id,personne_del_id)
@@ -213,7 +213,7 @@ class Interaction:
         channel_id = int(input('Id du groupe où envoyer le message : '))
         print('------------------------------------')
         print('Voici les utilisateurs dans le groupe :')
-        self.server.displaying_channel_members(channel_id)
+        print(self.server.get_channel_members(channel_id))
         print('------------------------------------')
         sender_id=int(input('Id de l\'expéditeur : '))
         content=input('Quel est le message à envoyer: ')

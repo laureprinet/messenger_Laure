@@ -17,6 +17,8 @@ class RemoteServer(Server) :
     @override
     def get_user(self)->list[User]:
         response_u = requests.get(self.url+'/users')
+        # N'oubliez pas de vérifier si response_u.status_code vaut bien 200
+        # et de gérer l'erreur si ce n'est pas le cas
         return [User((user['id']), user['name']) for user in response_u.json()]
     @override
     def get_channel(self)->list[Channel]:
@@ -46,15 +48,18 @@ class RemoteServer(Server) :
 
 ### Concernant les groupes ###
     @override
-    def displaying_channel_members(self,id_channel:int)->list[User]:
+    def get_channel_members(self,id_channel:int)->list[User]:
         response= requests.get(self.url+f'/channels/{id_channel}/members')
-        print ([User(user["id"],user["name"]) for user in response.json()])
+        return [User(user["id"],user["name"]) for user in response.json()]
     @override
     def adding_member_to_channel(self, id_channel:int, id_member:int)->None:
         requests.post(self.url+f'/channels/{id_channel}/join', json={"user_id": id_member})
     @override
     def creating_new_group(self, name:str, membres:list[int])->None:
         requests.post(self.url+f'/channels/create', json={"name": name})
+        # Attention, rien n'empêche 2 canaux différents d'avoir le même nom.
+        # La requête POST renvoie l'identifiant du canal nouvellement créé,
+        # vous auriez pu l'utiliser directement.
         for channel in self.get_channel():
             if channel.name==name:
                 id_channel=channel.id
